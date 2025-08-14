@@ -180,6 +180,7 @@
   .viz-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:12px}
   .viz-thumb{position:relative; width:100%; padding-top:100%; border:1px solid var(--border); border-radius:14px; background:#111317 center/cover no-repeat; cursor:pointer; overflow:hidden}
   .viz-thumb .cap{position:absolute; inset:auto 0 0 0; padding:6px 8px; background:linear-gradient(180deg, transparent, rgba(0,0,0,.55)); font-size:12px}
+  .viz-thumb video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
 </style>
 </head>
 <body>
@@ -199,6 +200,7 @@
       <button data-view="journal">📖 <span>Journal</span></button>
       <button data-view="playlists">🎵 <span>Playlists</span></button>
       <button data-view="visualizers">🖼️ <span>Visualizers</span></button>
+      <button data-view="videos">🎬 <span>Videos</span></button>
     </div>
 
     <div class="nav-section">SPECIAL</div>
@@ -265,6 +267,22 @@
       <div id="vizTagBar" class="tagbar"></div>
       <div id="vizContainer"></div>
       <div id="vizEmpty" class="empty" style="display:none">No images found</div>
+    </section>
+
+    <!-- Videos View -->
+    <section id="videos-view" class="view" hidden>
+      <h2 class="title">Videos</h2>
+      <p style="color:var(--muted); margin:-4px 0 14px">Browse all videos by portal. Click a thumbnail to play.</p>
+      <div class="viz-toolbar">
+        <button class="btn primary" id="vidUploadBtn">＋ Upload Videos</button>
+        <input id="vidUrlInput" class="text" placeholder="Add video URL..." style="min-width:240px"/>
+        <button class="btn" id="vidUrlAdd">Add</button>
+        <input id="vidSearch" class="text" placeholder="Search by name or tag..." style="min-width:240px"/>
+        <select id="vidPortalFilter" class="text" style="max-width:240px"><option value="">All portals</option></select>
+      </div>
+      <div id="vidTagBar" class="tagbar"></div>
+      <div id="vidContainer"></div>
+      <div id="vidEmpty" class="empty" style="display:none">No videos found</div>
     </section>
 
     <!-- Waiting Rooms -->
@@ -545,7 +563,7 @@
         <div class="field"><label class="label">Name</label><input id="wrName" class="text"/></div>
         <div class="field"><label class="label">Use as default</label><label style="display:flex; gap:8px; align-items:center"><input type="checkbox" id="wrDefault"/> <span class="muted">New portals link to this by default</span></label></div>
         <div class="field"><label class="label">Description</label>
-          <div class="rte"><div class="rtebar"><button data-cmd="bold">B</button><button data-cmd="italic"><em>I</em></button><button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">• List</button><button data-cmd="insertOrderedList">1. List</button><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🖼 Add Image<input type="file" accept="image/*" data-img="wr"></label></div><div id="wrDesc" class="area" contenteditable="true"></div></div>
+          <div class="rte"><div class="rtebar"><button data-cmd="bold">B</button><button data-cmd="italic"><em>I</em></button><button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">• List</button><button data-cmd="insertOrderedList">1. List</button><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🖼 Add Image<input type="file" accept="image/*" data-img="wr"></label><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🎬 Add Video<input type="file" accept="video/*" data-vid="wr"></label><input type="text" data-vid-url="wr" placeholder="Video URL" class="text" style="max-width:150px; margin-left:8px"/></div><div id="wrDesc" class="area" contenteditable="true"></div></div>
         </div>
         <div class="field"><label class="label">Affirmations (one per line)</label><textarea id="wrAff" class="textarea"></textarea></div>
         <div class="field"><label class="label">Pre-shift Checklist</label><div style="display:flex; gap:8px"><input id="wrChecklistItem" class="text" placeholder="Add checklist item"/><button class="btn" id="wrAddItem">Add</button></div><ul id="wrChecklist" style="margin:8px 0 0 18px"></ul></div>
@@ -568,7 +586,7 @@
         <div class="field"><label class="label">Tags</label><div id="jTags" class="tagbar"></div></div>
       </div>
       <div>
-        <div class="field"><label class="label">Entry</label><div class="rte"><div class="rtebar"><button data-cmd="bold">B</button><button data-cmd="italic"><em>I</em></button><button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">• List</button><button data-cmd="insertOrderedList">1. List</button><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🖼 Add Image<input type="file" accept="image/*" data-img="journal"></label></div><div id="jBody" class="area" contenteditable="true" spellcheck="false" style="max-height:40vh; overflow-y:auto"></div></div></div>
+        <div class="field"><label class="label">Entry</label><div class="rte"><div class="rtebar"><button data-cmd="bold">B</button><button data-cmd="italic"><em>I</em></button><button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">• List</button><button data-cmd="insertOrderedList">1. List</button><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🖼 Add Image<input type="file" accept="image/*" data-img="journal"></label><label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🎬 Add Video<input type="file" accept="video/*" data-vid="journal"></label><input type="text" data-vid-url="journal" placeholder="Video URL" class="text" style="max-width:150px; margin-left:8px"/></div><div id="jBody" class="area" contenteditable="true" spellcheck="false" style="max-height:40vh; overflow-y:auto"></div></div></div>
         <div class="actions"><button class="btn ghost" id="jCancel">Cancel</button><button class="btn primary" id="jSave">Save Entry</button></div>
       </div>
     </div>
@@ -592,6 +610,23 @@
   </div>
 </div>
 
+<div class="modal" id="vidUploadModal" aria-hidden="true">
+  <div class="modal-card" style="width:min(720px,95vw)">
+    <h3 style="margin:0 0 10px">Upload Videos</h3>
+    <div class="modal-grid" style="grid-template-columns:1fr 1fr">
+      <div>
+        <div class="field"><label class="label">Select Files</label><input id="vidFiles" class="text" type="file" accept="video/*" multiple/></div>
+        <div class="field"><label class="label">Name prefix (optional)</label><input id="vidName" class="text" placeholder="e.g. clip_"/></div>
+      </div>
+      <div>
+        <div class="field"><label class="label">Associate to Portal</label><select id="vidPortalSel" class="text"><option value="-1">Unassigned</option></select></div>
+        <div class="field"><label class="label">Tags (comma-separated)</label><input id="vidTagsInput" class="text" placeholder="e.g. scene, intro"/></div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn ghost" id="vidCancel">Cancel</button><button class="btn primary" id="vidSave">Save Videos</button></div>
+  </div>
+</div>
+
 <div class="modal" id="lightbox" aria-hidden="true">
   <div class="modal-card" style="width:min(95vw, 1100px); background:#0b0c10; border-color:#1b1d22">
     <div style="display:flex; justify-content:space-between; align-items:center; margin:-8px -8px 8px 0">
@@ -603,6 +638,7 @@
     </div>
     <div style="display:grid; place-items:center; background:#0b0c10; border:1px solid var(--border); border-radius:12px; padding:8px">
       <img id="lbImg" src="" alt="full" style="max-width:100%; max-height:70vh; border-radius:10px" />
+      <video id="lbVid" src="" controls style="max-width:100%; max-height:70vh; border-radius:10px; display:none"></video>
     </div>
   </div>
 </div>
@@ -986,9 +1022,10 @@
     portals:[], 
     waitingRooms:[], 
     journal:[], 
-    playlists:[], 
-    images:[], 
-    dreams:[], 
+    playlists:[],
+    images:[],
+    videos:[],
+    dreams:[],
     lucidGoals:[], 
     techniques:[], 
     projections:[], 
@@ -1007,6 +1044,7 @@
   
   if(!state.playlists) state.playlists=[];
   if(!state.images) state.images=[];
+  if(!state.videos) state.videos=[];
   if(!state.dreams) state.dreams=[];
   if(!state.lucidGoals) state.lucidGoals=[];
   if(!state.techniques) state.techniques=[];
@@ -1034,9 +1072,10 @@
   const views={ 
     portals:qs('#portals-view'), 
     journal:qs('#journal-view'), 
-    playlists:qs('#playlists-view'), 
-    waiting:qs('#waiting-view'), 
-    visualizers:qs('#visualizers-view'), 
+    playlists:qs('#playlists-view'),
+    waiting:qs('#waiting-view'),
+    visualizers:qs('#visualizers-view'),
+    videos:qs('#videos-view'),
     settings:qs('#settings-view'),
     lucid:qs('#lucid-view'),
     astral:qs('#astral-view')
@@ -1055,6 +1094,7 @@
       if(view==='waiting') renderWR();
       if(view==='playlists') renderPlaylists();
       if(view==='visualizers') renderVisualizers();
+      if(view==='videos') renderVideos();
       if(view==='lucid') renderLucidDreaming();
       if(view==='astral') renderAstralProjection();
     });
@@ -1569,7 +1609,7 @@
   plSearch?.addEventListener('input', ()=> renderPlaylists());
   plPortalFilter?.addEventListener('change', ()=> renderPlaylists());
 
-  // RTE shared (image insert)
+  // RTE shared (media insert)
   document.addEventListener('click',(e)=>{
     const btn=e.target.closest('[data-cmd]'); 
     if(btn){ 
@@ -1581,14 +1621,34 @@
     }
   });
 
-  // Handle file input for RTE image insertion
+  // Handle file input for RTE media insertion
+  function insertVideoFromUrl(inp){
+    const url=inp.value.trim();
+    if(!url) return;
+    const rte=inp.closest('.rte');
+    const area=rte?.querySelector('.area');
+    if(area){
+      area.focus();
+      const vid=document.createElement('video');
+      vid.src=url;
+      vid.controls=true;
+      vid.style.maxWidth='100%';
+      vid.style.borderRadius='10px';
+      vid.style.border='1px solid var(--border)';
+      vid.style.display='block';
+      vid.style.margin='8px 0';
+      area.appendChild(vid);
+      inp.value='';
+    }
+  }
+
   document.addEventListener('change',(e)=>{
     const up=e.target.closest('input[type=file][data-img]');
-    if(up){ 
-      const f=e.target.files[0]; 
-      if(!f) return; 
-      const r=new FileReader(); 
-      r.onload=()=>{ 
+    if(up){
+      const f=e.target.files[0];
+      if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
         const rte = up.closest('.rte');
         const area = rte?.querySelector('.area');
         if(area) {
@@ -1601,7 +1661,7 @@
           img.style.border = '1px solid var(--border)';
           img.style.display = 'block';
           img.style.margin = '8px 0';
-          
+
           const selection = window.getSelection();
           if(selection && selection.rangeCount > 0 && area.contains(selection.anchorNode)) {
             const range = selection.getRangeAt(0);
@@ -1611,11 +1671,51 @@
           } else {
             area.appendChild(img);
           }
-          
-          up.value = ''; 
+
+          up.value = '';
         }
-      }; 
-      r.readAsDataURL(f); 
+      };
+      r.readAsDataURL(f);
+      return;
+    }
+
+    const vidUp=e.target.closest('input[type=file][data-vid]');
+    if(vidUp){
+      const f=e.target.files[0];
+      if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
+        const rte=vidUp.closest('.rte');
+        const area=rte?.querySelector('.area');
+        if(area){
+          area.focus();
+          const vid=document.createElement('video');
+          vid.src=r.result;
+          vid.controls=true;
+          vid.style.maxWidth='100%';
+          vid.style.borderRadius='10px';
+          vid.style.border='1px solid var(--border)';
+          vid.style.display='block';
+          vid.style.margin='8px 0';
+          area.appendChild(vid);
+          vidUp.value='';
+        }
+      };
+      r.readAsDataURL(f);
+      return;
+    }
+
+    const urlInp=e.target.closest('input[data-vid-url]');
+    if(urlInp){
+      insertVideoFromUrl(urlInp);
+    }
+  });
+
+  document.addEventListener('keydown',(e)=>{
+    const urlInp=e.target.closest('input[data-vid-url]');
+    if(urlInp && e.key==='Enter'){
+      e.preventDefault();
+      insertVideoFromUrl(urlInp);
     }
   });
 
@@ -1915,6 +2015,8 @@
             <button data-cmd="insertUnorderedList">• List</button>
             <button data-cmd="insertOrderedList">1. List</button>
             <label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🖼 Add Image<input type="file" accept="image/*" data-img="sec-${name}"></label>
+            <label class="btn-file" style="background:#171920; border:1px solid var(--border); padding:6px 8px; border-radius:8px; cursor:pointer">🎬 Add Video<input type="file" accept="video/*" data-vid="sec-${name}"></label>
+            <input type="text" data-vid-url="sec-${name}" placeholder="Video URL" class="text" style="max-width:150px; margin-left:8px"/>
           </div>
         </div>
         <div class="rte"><div class="area" contenteditable="true" data-area="${name}"></div></div>
@@ -1953,35 +2055,89 @@
     } 
   };
 
-  // RTE image insert for portal sections
+  // RTE media insert for portal sections
   document.addEventListener('change',(e)=>{
     const up=e.target.closest('input[type=file][data-img^="sec-"]');
-    if(up){ 
-      const f=e.target.files[0]; 
-      if(!f) return; 
-      const r=new FileReader(); 
-      r.onload=()=>{ 
-        const name=up.getAttribute('data-img').slice(4); 
-        const area=peEditors.querySelector(`[data-area="${CSS.escape(name)}"]`); 
-        if(area){ 
-          const img=document.createElement('img'); 
-          img.src=r.result; 
-          img.alt=''; 
-          img.style.maxWidth='100%'; 
-          img.style.borderRadius='10px'; 
-          img.style.border='1px solid var(--border)'; 
-          const sel=window.getSelection(); 
-          if(sel && sel.rangeCount){ 
-            const range=sel.getRangeAt(0); 
-            range.collapse(false); 
-            range.insertNode(img); 
-          } else { 
-            area.appendChild(img); 
-          } 
-        } 
-        up.value=''; 
-      }; 
-      r.readAsDataURL(f); 
+    if(up){
+      const f=e.target.files[0];
+      if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
+        const name=up.getAttribute('data-img').slice(4);
+        const area=peEditors.querySelector(`[data-area="${CSS.escape(name)}"]`);
+        if(area){
+          const img=document.createElement('img');
+          img.src=r.result;
+          img.alt='';
+          img.style.maxWidth='100%';
+          img.style.borderRadius='10px';
+          img.style.border='1px solid var(--border)';
+          const sel=window.getSelection();
+          if(sel && sel.rangeCount){
+            const range=sel.getRangeAt(0);
+            range.collapse(false);
+            range.insertNode(img);
+          } else {
+            area.appendChild(img);
+          }
+        }
+        up.value='';
+      };
+      r.readAsDataURL(f);
+      return;
+    }
+
+    const vup=e.target.closest('input[type=file][data-vid^="sec-"]');
+    if(vup){
+      const f=e.target.files[0];
+      if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
+        const name=vup.getAttribute('data-vid').slice(4);
+        const area=peEditors.querySelector(`[data-area="${CSS.escape(name)}"]`);
+        if(area){
+          const vid=document.createElement('video');
+          vid.src=r.result;
+          vid.controls=true;
+          vid.style.maxWidth='100%';
+          vid.style.borderRadius='10px';
+          vid.style.border='1px solid var(--border)';
+          vid.style.display='block';
+          vid.style.margin='8px 0';
+          area.appendChild(vid);
+        }
+        vup.value='';
+      };
+      r.readAsDataURL(f);
+      return;
+    }
+
+    const urlInp=e.target.closest('input[data-vid-url^="sec-"]');
+    if(urlInp){
+      const name=urlInp.getAttribute('data-vid-url').slice(4);
+      const area=peEditors.querySelector(`[data-area="${CSS.escape(name)}"]`);
+      const url=urlInp.value.trim();
+      if(area && url){
+        const vid=document.createElement('video');
+        vid.src=url;
+        vid.controls=true;
+        vid.style.maxWidth='100%';
+        vid.style.borderRadius='10px';
+        vid.style.border='1px solid var(--border)';
+        vid.style.display='block';
+        vid.style.margin='8px 0';
+        area.appendChild(vid);
+        urlInp.value='';
+      }
+    }
+  });
+
+  document.addEventListener('keydown',(e)=>{
+    const urlInp=e.target.closest('input[data-vid-url^="sec-"]');
+    if(urlInp && e.key==='Enter'){
+      e.preventDefault();
+      const evt=new Event('change');
+      urlInp.dispatchEvent(evt);
     }
   });
 
@@ -2007,41 +2163,71 @@
   const vizSearch=qs('#vizSearch'); 
   const vizPortalFilter=qs('#vizPortalFilter'); 
   const vizTagBar=qs('#vizTagBar');
-  const vizUploadModal=qs('#vizUploadModal'); 
-  const vizUploadBtn=qs('#vizUploadBtn'); 
-  const vizFiles=qs('#vizFiles'); 
-  const vizName=qs('#vizName'); 
-  const vizPortalSel=qs('#vizPortalSel'); 
+  const vizUploadModal=qs('#vizUploadModal');
+  const vizUploadBtn=qs('#vizUploadBtn');
+  const vizFiles=qs('#vizFiles');
+  const vizName=qs('#vizName');
+  const vizPortalSel=qs('#vizPortalSel');
   const vizTagsInput=qs('#vizTagsInput');
-  const lightbox=qs('#lightbox'); 
-  const lbImg=qs('#lbImg'); 
-  const lbMeta=qs('#lbMeta'); 
+
+  const vidContainer=qs('#vidContainer');
+  const vidEmpty=qs('#vidEmpty');
+  const vidSearch=qs('#vidSearch');
+  const vidPortalFilter=qs('#vidPortalFilter');
+  const vidTagBar=qs('#vidTagBar');
+  const vidUploadModal=qs('#vidUploadModal');
+  const vidUploadBtn=qs('#vidUploadBtn');
+  const vidFiles=qs('#vidFiles');
+  const vidName=qs('#vidName');
+  const vidPortalSel=qs('#vidPortalSel');
+  const vidTagsInput=qs('#vidTagsInput');
+  const vidUrlInput=qs('#vidUrlInput');
+  const vidUrlAdd=qs('#vidUrlAdd');
+  const lightbox=qs('#lightbox');
+  const lbImg=qs('#lbImg');
+  const lbVid=qs('#lbVid');
+  const lbMeta=qs('#lbMeta');
   const lbDelete=qs('#lbDelete');
-  qs('#lbClose')?.addEventListener('click',()=> lightbox.classList.remove('open'));
+  qs('#lbClose')?.addEventListener('click',()=>{ lbVid?.pause(); lightbox.classList.remove('open'); });
 
   let vizActiveTags=new Set();
-  let currentLightboxImageId=null;
+  let vidActiveTags=new Set();
+  let currentLightbox={type:null, id:null};
 
-  function openLightbox(src, meta, imageId){ 
-    lbImg.src=src; 
-    lbMeta.textContent=meta||''; 
-    currentLightboxImageId=imageId;
-    if(lbDelete) {
-      lbDelete.style.display = imageId ? 'inline-flex' : 'none';
+  function openLightbox(src, meta, mediaId, type='image'){
+    lbMeta.textContent=meta||'';
+    currentLightbox={type, id:mediaId};
+    if(type==='video'){
+      if(lbVid){
+        lbVid.src=src;
+        lbVid.style.display='block';
+        lbImg.style.display='none';
+        try{ lbVid.play(); }catch{}
+      }
+    }else{
+      lbImg.src=src;
+      lbImg.style.display='block';
+      if(lbVid){ lbVid.pause(); lbVid.style.display='none'; }
     }
-    lightbox.classList.add('open'); 
+    if(lbDelete){
+      lbDelete.style.display = mediaId ? 'inline-flex' : 'none';
+    }
+    lightbox.classList.add('open');
   }
 
   qs('#lbDelete')?.addEventListener('click', async ()=>{
-    if(!currentLightboxImageId) return;
-    
-    if(await askConfirm('Delete this image? This cannot be undone.')){
-      const imageIndex = state.images.findIndex(img => img.id === currentLightboxImageId);
-      if(imageIndex > -1){
-        state.images.splice(imageIndex, 1);
+    if(!currentLightbox.id) return;
+    const type=currentLightbox.type;
+    const arr = type==='video'? (state.videos||[]) : (state.images||[]);
+    const label = type==='video'? 'video' : 'image';
+    if(await askConfirm(`Delete this ${label}? This cannot be undone.`)){
+      const idx = arr.findIndex(it => it.id === currentLightbox.id);
+      if(idx > -1){
+        arr.splice(idx, 1);
         save();
         lightbox.classList.remove('open');
-        renderVisualizers();
+        if(type==='video') renderVideos();
+        else renderVisualizers();
       }
     }
   });
@@ -2067,6 +2253,33 @@
               derived:true 
             }); 
           } 
+        });
+      });
+    });
+    return derived;
+  }
+
+  function scanPortalVideos(){
+    const derived=[];
+    (state.portals||[]).forEach((p,pi)=>{
+      if(!p || !p.sections) return;
+      Object.values(p.sections).forEach(html=>{
+        if(!html) return;
+        const div=document.createElement('div');
+        div.innerHTML=html;
+        div.querySelectorAll('video').forEach((vid,idx)=>{
+          const src=vid.getAttribute('src');
+          if(src){
+            derived.push({
+              id:`drv_${pi}_${idx}_${Math.random().toString(36).slice(2)}`,
+              src,
+              name:`Embedded ${idx+1}`,
+              portalIndex:pi,
+              tags:['embedded'],
+              created:0,
+              derived:true
+            });
+          }
         });
       });
     });
@@ -2134,7 +2347,7 @@
       }));
     }
 
-    vizContainer.innerHTML=''; 
+    vizContainer.innerHTML='';
     let total=0;
     const keys=[...byPortal.keys()].sort((a,b)=> a-b);
     keys.forEach(key=>{
@@ -2165,59 +2378,227 @@
     vizEmpty.style.display = total? 'none' : 'grid';
   }
 
-  vizUploadBtn?.addEventListener('click', ()=>{
-    vizPortalSel.innerHTML=''; 
-    const none=document.createElement('option'); 
-    none.value='-1'; 
-    none.textContent='Unassigned'; 
-    vizPortalSel.appendChild(none); 
-    (state.portals||[]).forEach((p,i)=>{ 
-      const o=document.createElement('option'); 
-      o.value=String(i); 
-      o.textContent=p.name||`Portal ${i+1}`; 
-      vizPortalSel.appendChild(o); 
+  function renderVideos(){
+    if(!vidContainer) return;
+    vidPortalFilter.innerHTML='';
+    const all=document.createElement('option');
+    all.value='';
+    all.textContent='All portals';
+    vidPortalFilter.appendChild(all);
+    (state.portals||[]).forEach((p,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=p.name||`Portal ${i+1}`;
+      vidPortalFilter.appendChild(o);
     });
-    if(vizFiles) vizFiles.value=''; 
-    if(vizName) vizName.value=''; 
-    if(vizTagsInput) vizTagsInput.value=''; 
+
+    vidTagBar.innerHTML='';
+    const allTags = Array.from(new Set((state.videos||[]).flatMap(i=>i.tags||[]))).sort((a,b)=> a.localeCompare(b));
+    allTags.forEach(t=>{
+      const chip=document.createElement('span');
+      chip.className='tag';
+      chip.textContent=t;
+      chip.dataset.tag=t;
+      if(vidActiveTags.has(t)) chip.classList.add('active');
+      chip.onclick=()=>{
+        vidActiveTags.has(t)? vidActiveTags.delete(t): vidActiveTags.add(t);
+        renderVideos();
+      };
+      vidTagBar.appendChild(chip);
+    });
+
+    const derived = scanPortalVideos();
+    const q=(vidSearch?.value||'').toLowerCase().trim();
+    const pf=vidPortalFilter?.value||'';
+    const pfIdx = pf===''? null : parseInt(pf,10);
+
+    const byPortal=new Map();
+    function addToGroup(rec){
+      const key = rec.portalIndex!=null? rec.portalIndex : -1;
+      if(!byPortal.has(key)) byPortal.set(key, []);
+      byPortal.get(key).push(rec);
+    }
+
+    (state.videos||[]).forEach(v=> addToGroup(v));
+    derived.forEach(v=> addToGroup(v));
+
+    for(const [k,arr] of byPortal.entries()){
+      byPortal.set(k, arr.filter(rec=>{
+        if(pfIdx!==null && (rec.portalIndex??-1)!==pfIdx) return false;
+        if(vidActiveTags.size){
+          const set=new Set(rec.tags||[]);
+          for(const t of vidActiveTags){
+            if(!set.has(t)) return false;
+          }
+        }
+        if(q){
+          const hay=[rec.name||'', ...(rec.tags||[])].join(' ').toLowerCase();
+          if(!hay.includes(q)) return false;
+        }
+        return true;
+      }));
+    }
+
+    vidContainer.innerHTML='';
+    let total=0;
+    const keys=[...byPortal.keys()].sort((a,b)=> a-b);
+    keys.forEach(key=>{
+      const items=byPortal.get(key)||[];
+      if(!items.length) return;
+      total+=items.length;
+      const grp=document.createElement('div');
+      grp.className='viz-group';
+      const title = key===-1? 'Unassigned' : (state.portals[key]?.name || `Portal ${key+1}`);
+      grp.innerHTML = `<h3>${title} • ${items.length}</h3>`;
+      const grid=document.createElement('div');
+      grid.className='viz-grid';
+      items.forEach(it=>{
+        const th=document.createElement('div');
+        th.className='viz-thumb';
+        const v=document.createElement('video');
+        v.src=it.src;
+        v.muted=true;
+        v.playsInline=true;
+        v.preload='metadata';
+        th.appendChild(v);
+        const cap=document.createElement('div');
+        cap.className='cap';
+        cap.textContent=it.name || (it.derived? 'Embedded' : 'Video');
+        th.appendChild(cap);
+        th.onclick=()=> openLightbox(it.src, `${title}${it.tags?.length? ' • '+it.tags.join(', '):''}`, it.derived ? null : it.id, 'video');
+        grid.appendChild(th);
+      });
+      grp.appendChild(grid);
+      vidContainer.appendChild(grp);
+    });
+
+    vidEmpty.style.display = total? 'none' : 'grid';
+  }
+
+  vizUploadBtn?.addEventListener('click', ()=>{
+    vizPortalSel.innerHTML='';
+    const none=document.createElement('option');
+    none.value='-1';
+    none.textContent='Unassigned';
+    vizPortalSel.appendChild(none);
+    (state.portals||[]).forEach((p,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=p.name||`Portal ${i+1}`;
+      vizPortalSel.appendChild(o);
+    });
+    if(vizFiles) vizFiles.value='';
+    if(vizName) vizName.value='';
+    if(vizTagsInput) vizTagsInput.value='';
     vizUploadModal.classList.add('open');
   });
-  
+
   qs('#vizCancel')?.addEventListener('click', ()=> vizUploadModal.classList.remove('open'));
   qs('#vizSave')?.addEventListener('click', ()=>{
-    const files = Array.from(vizFiles.files||[]); 
-    if(!files.length){ 
-      vizUploadModal.classList.remove('open'); 
-      return; 
+    const files = Array.from(vizFiles.files||[]);
+    if(!files.length){
+      vizUploadModal.classList.remove('open');
+      return;
     }
-    const prefix=(vizName.value||'').trim(); 
+    const prefix=(vizName.value||'').trim();
     const tags=(vizTagsInput.value||'').split(',').map(s=>s.trim()).filter(Boolean);
     const portalIndex=parseInt(vizPortalSel.value||'-1',10);
-    let pending=files.length; 
+    let pending=files.length;
     if(!state.images) state.images=[];
-    files.forEach((f,idx)=>{ 
-      const r=new FileReader(); 
-      r.onload=()=>{ 
-        state.images.push({ 
-          id:uid(), 
-          src:r.result, 
-          name: prefix? `${prefix}${idx+1}` : (f.name||`image_${idx+1}`), 
-          tags:[...tags], 
-          portalIndex: isNaN(portalIndex)? -1 : portalIndex, 
-          created: Date.now() 
-        }); 
-        if(--pending===0){ 
-          save(); 
-          vizUploadModal.classList.remove('open'); 
-          renderVisualizers(); 
-        } 
-      }; 
-      r.readAsDataURL(f); 
+    files.forEach((f,idx)=>{
+      const r=new FileReader();
+      r.onload=()=>{
+        state.images.push({
+          id:uid(),
+          src:r.result,
+          name: prefix? `${prefix}${idx+1}` : (f.name||`image_${idx+1}`),
+          tags:[...tags],
+          portalIndex: isNaN(portalIndex)? -1 : portalIndex,
+          created: Date.now()
+        });
+        if(--pending===0){
+          save();
+          vizUploadModal.classList.remove('open');
+          renderVisualizers();
+        }
+      };
+      r.readAsDataURL(f);
     });
   });
 
   vizSearch?.addEventListener('input', ()=> renderVisualizers());
   vizPortalFilter?.addEventListener('change', ()=> renderVisualizers());
+
+  vidUploadBtn?.addEventListener('click', ()=>{
+    vidPortalSel.innerHTML='';
+    const none=document.createElement('option');
+    none.value='-1';
+    none.textContent='Unassigned';
+    vidPortalSel.appendChild(none);
+    (state.portals||[]).forEach((p,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=p.name||`Portal ${i+1}`;
+      vidPortalSel.appendChild(o);
+    });
+    if(vidFiles) vidFiles.value='';
+    if(vidName) vidName.value='';
+    if(vidTagsInput) vidTagsInput.value='';
+    vidUploadModal.classList.add('open');
+  });
+
+  qs('#vidCancel')?.addEventListener('click', ()=> vidUploadModal.classList.remove('open'));
+  qs('#vidSave')?.addEventListener('click', ()=>{
+    const files = Array.from(vidFiles.files||[]);
+    if(!files.length){
+      vidUploadModal.classList.remove('open');
+      return;
+    }
+    const prefix=(vidName.value||'').trim();
+    const tags=(vidTagsInput.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const portalIndex=parseInt(vidPortalSel.value||'-1',10);
+    let pending=files.length;
+    if(!state.videos) state.videos=[];
+    files.forEach((f,idx)=>{
+      const r=new FileReader();
+      r.onload=()=>{
+        state.videos.push({
+          id:uid(),
+          src:r.result,
+          name: prefix? `${prefix}${idx+1}` : (f.name||`video_${idx+1}`),
+          tags:[...tags],
+          portalIndex: isNaN(portalIndex)? -1 : portalIndex,
+          created: Date.now()
+        });
+        if(--pending===0){
+          save();
+          vidUploadModal.classList.remove('open');
+          renderVideos();
+        }
+      };
+      r.readAsDataURL(f);
+    });
+  });
+
+  vidUrlAdd?.addEventListener('click', ()=>{
+    const url=(vidUrlInput.value||'').trim();
+    if(!url) return;
+    if(!state.videos) state.videos=[];
+    state.videos.push({
+      id:uid(),
+      src:url,
+      name:url.split('/').pop()||'Video',
+      tags:[],
+      portalIndex:-1,
+      created:Date.now()
+    });
+    save();
+    vidUrlInput.value='';
+    renderVideos();
+  });
+
+  vidSearch?.addEventListener('input', ()=> renderVideos());
+  vidPortalFilter?.addEventListener('change', ()=> renderVideos());
 
   // ===== Lucid Dreaming System =====
   let currentDreamEntry = null;
@@ -3177,6 +3558,12 @@
           src: img.src?.startsWith('data:') ? `LOCAL_IMAGE_${img.id}` : img.src
         }));
       }
+      if(lightState.videos) {
+        lightState.videos = lightState.videos.map(vid => ({
+          ...vid,
+          src: vid.src?.startsWith('data:') ? `LOCAL_VIDEO_${vid.id}` : vid.src
+        }));
+      }
       
       const json = JSON.stringify(lightState); 
       const blob = new Blob([json], {type:'application/json'}); 
@@ -3212,11 +3599,23 @@
         if(localState?.images) {
           localState.images.forEach(img => localImageMap.set(img.id, img.src));
         }
-        
+
         incoming.images = incoming.images.map(img => ({
           ...img,
-          src: img.src?.startsWith('LOCAL_IMAGE_') ? 
+          src: img.src?.startsWith('LOCAL_IMAGE_') ?
             (localImageMap.get(img.id) || img.src) : img.src
+        }));
+      }
+      if(incoming.videos) {
+        const localState = load();
+        const localVideoMap = new Map();
+        if(localState?.videos) {
+          localState.videos.forEach(v => localVideoMap.set(v.id, v.src));
+        }
+        incoming.videos = incoming.videos.map(v => ({
+          ...v,
+          src: v.src?.startsWith('LOCAL_VIDEO_') ?
+            (localVideoMap.get(v.id) || v.src) : v.src
         }));
       }
       
@@ -3460,9 +3859,10 @@
   function renderAll(){ 
     renderPortals(); 
     renderJournal(); 
-    renderWR(); 
-    renderPlaylists(); 
+    renderWR();
+    renderPlaylists();
     renderVisualizers();
+    renderVideos();
     if(views.settings && !views.settings.hidden){ 
       renderSettings(); 
     } 
